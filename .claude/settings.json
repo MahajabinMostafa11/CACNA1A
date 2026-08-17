@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd wiki/CACNA1A.wiki && git status:*)",
+      "Bash(cd wiki/CACNA1A.wiki && git diff:*)",
+      "Bash(cd wiki/CACNA1A.wiki && git log:*)",
+      "Bash(cd wiki/CACNA1A.wiki && git add:*)",
+      "Bash(cd wiki/CACNA1A.wiki && git commit *)",
+      "Bash(git -C wiki/CACNA1A.wiki status:*)",
+      "Bash(git -C wiki/CACNA1A.wiki diff:*)",
+      "Bash(git -C wiki/CACNA1A.wiki log:*)",
+      "Bash(git -C wiki/CACNA1A.wiki add:*)",
+      "Bash(git -C wiki/CACNA1A.wiki commit *)",
+      "Bash(./scripts/kg/build-graph.sh)",
+      "Bash(./wiki/init-wiki.sh)",
+      "Bash(./wiki/init-wiki.sh *)",
+      "Bash(./wiki/agents/claude-code/setup.sh)",
+      "Bash(./wiki/agents/claude-code/setup.sh *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(uv run python *)"
+    ]
+  }
+}
