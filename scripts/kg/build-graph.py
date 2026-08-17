@@ -28,6 +28,7 @@ in Python so the in-process API is available to downstream agent tools.
 """
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -208,6 +209,22 @@ def main():
     ontology_path = fetch_spec("ontology.ttl", refresh=args.refresh_spec)
     shapes_path = fetch_spec("shapes.ttl", refresh=args.refresh_spec)
     context_path = fetch_spec("context.jsonld", refresh=args.refresh_spec)
+
+    # Merge in project-local context terms (e.g. MONDO ontology prefix) not
+    # present in the published spec. Local additions win on key collisions.
+    local_context_file = SCRIPT_DIR / "local-context.jsonld"
+    if local_context_file.exists():
+        with open(context_path) as f:
+            fetched_ctx = json.load(f)
+        with open(local_context_file) as f:
+            local_ctx = json.load(f)
+        merged_ctx = dict(fetched_ctx.get("@context", {}))
+        merged_ctx.update(local_ctx.get("@context", {}))
+        merged_path = BUILD_DIR / "context-merged.jsonld"
+        with open(merged_path, "w") as f:
+            json.dump({"@context": merged_ctx}, f, indent=2)
+        print(f"  Merged {local_context_file.name} -> {merged_path}", file=sys.stderr)
+        context_path = merged_path
     print("", file=sys.stderr)
 
     # --- Step 2: extract JSON-LD ---

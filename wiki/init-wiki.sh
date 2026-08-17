@@ -50,6 +50,13 @@
 #                           not exist in the wiki yet, then exit — no create,
 #                           no update pass. Used by adopt.sh when the wiki
 #                           sub-repo already exists (#75).
+#   --mondo "MONDO:ID"      MONDO disease ontology id for the project. Only
+#                           used at create time: spliced into Home's
+#                           frontmatter as a single `mondo:` value. Projects
+#                           spanning multiple genetically-related diseases
+#                           should hand-edit Home afterward to a YAML list,
+#                           one id per disease (see SCHEMA's ontology
+#                           identifiers section).
 # ──────────────────────────────────────────────────────────────────────────────
 #
 
@@ -61,6 +68,7 @@ REPO_NAME_OVERRIDE=""
 USE_GITHUB=false
 WIKI_AGENT=""
 STAMP_MISSING_ONLY=false
+MONDO_ID=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -69,6 +77,7 @@ while [[ $# -gt 0 ]]; do
         --github) USE_GITHUB=true; shift ;;
         --agent) WIKI_AGENT="$2"; shift 2 ;;
         --stamp-missing-templates) STAMP_MISSING_ONLY=true; shift ;;
+        --mondo) MONDO_ID="$2"; shift 2 ;;
         -h|--help)
             sed -n '2,/^$/p' "$0" | sed 's/^# \?//'
             exit 0
@@ -120,6 +129,15 @@ HOME_NS="Home_${REPO_NAME}"
 INDEX_NS="index_${REPO_NAME}"
 LOG_NS="log_${REPO_NAME}"
 SCHEMA_NS="SCHEMA_${REPO_NAME}"
+
+# --mondo splice: a single `mondo:` frontmatter line for Home, only emitted
+# when --mondo was passed. Multi-disease projects hand-edit this to a YAML
+# list afterward (see SCHEMA's ontology identifiers section).
+MONDO_FM_LINE=""
+if [[ -n "$MONDO_ID" ]]; then
+    MONDO_FM_LINE="mondo: \"${MONDO_ID}\"
+"
+fi
 
 # --- Stamp wiki/*.md.template files into the wiki ---------------------------
 # Each *.md.template alongside this script gets sed-substituted (same
@@ -229,6 +247,7 @@ cat > "$WIKI_DIR/${HOME_NS}.md" << HOMEEOF
 ---
 type: index
 up: "[[WIKI-INDEX]]"
+${MONDO_FM_LINE}created: "$(date +%Y-%m-%d)"
 ---
 
 # ${PROJECT_NAME}
@@ -274,6 +293,7 @@ cat > "$WIKI_DIR/${INDEX_NS}.md" << INDEXEOF
 ---
 type: index
 up: "[[${HOME_NS}]]"
+created: "$(date +%Y-%m-%d)"
 ---
 
 # Index — ${PROJECT_NAME}
@@ -293,6 +313,7 @@ cat > "$WIKI_DIR/${LOG_NS}.md" << LOGEOF
 ---
 type: index
 up: "[[${HOME_NS}]]"
+created: "$(date +%Y-%m-%d)"
 ---
 
 # Log — ${PROJECT_NAME}
@@ -322,6 +343,7 @@ if [[ "$MODE" == "create" ]]; then
 ---
 type: reference
 up: "[[${HOME_NS}]]"
+created: "$(date +%Y-%m-%d)"
 ---
 
 # Wiki Schema — ${PROJECT_NAME}
